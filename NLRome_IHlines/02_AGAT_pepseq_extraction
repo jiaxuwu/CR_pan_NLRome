@@ -1,3 +1,5 @@
+#Extract peptide sequence based on the gff file annotated by Helixer
+
 module load miniconda/3-py3.10 agat/1.2.0
 source activate agat-1.2.0
 

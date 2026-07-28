@@ -1,0 +1,57 @@
+#merge ONT single .fastq files
+*.fastq.gz > H5_raw.fastq.gz
+	
+#tools for ONT quality control 
+##fastqc
+parallel -j 6 'fastqc {} -o ./fastqc' ::: H1_raw.fastq.gz H2_raw.fastq.gz  H3_raw.fastq.gz  H4_raw.fastq.gz  H5_raw.fastq.gz  westar_raw.fastq.gz
+
+##MinIONQC
+Rscript MinIONQC.R -i path/to/sequencing_summary.txt
+
+##nanoQC
+nanoQC wester_raw.fastq.gz
+
+##Nanoplot
+NanoPlot -t 3 --fastq westar_raw.fastq.gz --maxlength 40000 --plots dot pauvre kde hex -o ./nanoplot/westar
+
+#tools for data filter
+
+##NanoFilt
+gunzip -c /path/to/H1_raw.fastq.gz | NanoFilt -q 7 -l 1000 --headcrop 9| gzip > /path/to/H1_clean_NanoFilt.fastq.gz
+
+#assembler
+
+##flye assembly
+module load python/3.7 flye/2.9
+flye --nano-raw H1_clean_NanoFilt.fastq.gz -g 930m -o ./assemble/H1 -t 20
+ 
+#Check the assemble quality
+## QUAST
+module load python/2.7 quast/4.6.1
+quast.py -t 10 assembly.fasta -R /home/jiwu08/ABCGfamily/Bnapus_genome/da-ae/GCA_020379485.1_Da-Ae_genomic.fna -G /home/jiwu08/ABCGfamily/Bnapus_genome/da-ae/GCA_020379485.1_Da-Ae_genomic.gff -o ../../quast_result
+
+##CRAQ
+perl bin/craq -g /home/jiwu08/longread_canola/raw_data/assemble_flye/H1/assembly.fasta -sms /home/jiwu08/longread_canola/raw_data/H1_clean_NanoFilt.fastq.gz -ngs /home/jiwu08/renseq_short/data/9447-JK-7_001_S1_L005_R1.fastq.gz,/home/jiwu08/renseq_short/data/9447-JK-7_001_S1_L005_R2.fastq.gz -x map-ont 
+
+#polish 
+
+##medaka (first-round) 
+module load miniconda/3-py3.10 medaka/1.8.0 source activate medaka-1.8.0
+medaka_consensus -i ../4.filter/clean.filtlong.fq.gz -d ../6.quast/miniasm.fa -o medaka_output -m r941_min_high -t 10
+
+##hapog (second-round)
+module load python/3.7 bwa/0.7.13 samtools/1.13 hapog/1.2
+hapog.py --genome /home/jiwu08/longread_canola/raw_data/polish_medaka/H1/consensus_h1.fasta --pe1 /home/jiwu08/renseq_short/data/9447-JK-7_002_S1_L005_R1.fastq.gz --pe2 /home/jiwu08/renseq_short/data/9447-JK-7_002_S1_L005_R2.fastq.gz -o /home/jiwu08/longread_canola/raw_data/polish_hapog/H1 -t 20
+
+##mummer (check the different after polishing)
+module load mummer/3.23
+dnadiff  /home/jiwu08/longread_canola/raw_data/assemble_flye/westar/assembly_westar.fasta hapog_westar.fasta > dnadiff_westar.out
+
+#NLR annotation
+
+##NLR-Annotator
+java -Xmx8000M -jar /home/jiwu08/NLR-Annotator/NLR-Annotator-v2.1b.jar -i /home/jiwu08/longread_canola/raw_data/polish_hapog/H1/hapog_results/H1_5000_filtered.fasta -x /home/jiwu08/NLR-Annotator/src/mot.txt -y /home/jiwu08/NLR-Annotator/src/store.txt -b ./output_H1.bed -t 10
+
+#bedtools 
+bedtools getfasta -fi /home/jiwu08/longread_canola/raw_data/polish_hapog/westar/hapog_results/westar_5000_filtered.fasta -bed output_westar.bed -s -fullHeader  -fo westar_nlr.fa
+

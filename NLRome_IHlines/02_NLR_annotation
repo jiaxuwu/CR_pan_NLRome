@@ -1,0 +1,12 @@
+#NLR annotation using NLRtracker
+
+module load hmmer/3.3
+module load python/3.5 interproscan/5.61-93.0
+
+/path/to/NLRtracker/NLRtracker.sh -c 10 -s /path/to/IH*_.fasta -o ./
+
+
+#NLR-ID searching using InterProScan
+
+module load interproscan/5.71-102.0
+interproscan.sh -f TSV -appl Pfam Gene3D SUPERFAMILY Coils -cpu 8 -i path/to/IH*_.fasta -b ./

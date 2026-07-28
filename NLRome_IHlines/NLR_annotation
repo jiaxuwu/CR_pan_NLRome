@@ -1,6 +1,0 @@
-#NLR annotation using NLRtracker
-
-module load hmmer/3.3
-module load python/3.5 interproscan/5.61-93.0
-
-/path/to/NLRtracker/NLRtracker.sh -c 10 -s ../hapog_IH*.fasta -o ./

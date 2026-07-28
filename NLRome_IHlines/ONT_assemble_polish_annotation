@@ -50,7 +50,6 @@ dnadiff  /path/to/assemble_flye/IH*/assembly_IH*.fasta /path/to/hapog_results/ha
 #filter sequences longer than 5000bp of the assembly
 
 ##biopython
-
 from Bio import SeqIO
 
 def filter_sequences(input_file, output_file, min_length):
@@ -64,3 +63,7 @@ output_fasta = 'IH*_5000_filtered.fasta'
 min_length = 5000
 
 filter_sequences(input_fasta, output_fasta, min_length)
+
+#IH lines annotation by using Helixer
+
+https://www.plabipd.de/helixer_main.html

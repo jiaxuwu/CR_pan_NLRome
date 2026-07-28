@@ -3,9 +3,9 @@ source activate agat-1.2.0
 
 agat_sp_extract_sequences.pl \
         --cfs \
-        -g IH*_helixer.gff \
-        -f Brassica_napus.Westar.v0.genome.fa \
-        -p -o IH*_peptide.fasta
+        -g path/to/IH*_helixer.gff \
+        -f path/to/IH*/hapog_results/IH*_5000_filtered.fasta \
+        -p -o path/to/IH*_peptide.fasta
 
 
 from Bio import SeqIO

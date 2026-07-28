@@ -3,15 +3,15 @@ source activate agat-1.2.0
 
 agat_sp_extract_sequences.pl \
         --cfs \
-        -g westar_helixer.gff \
+        -g IH*_helixer.gff \
         -f Brassica_napus.Westar.v0.genome.fa \
-        -p -o westar_peptide.fasta
+        -p -o IH*_peptide.fasta
 
 
 from Bio import SeqIO
 
-input_file = "IH1_peptide.fasta"
-output_file = "IH1_peptide_final.fasta"
+input_file = "IH*_peptide.fasta"
+output_file = "IH*_peptide_final.fasta"
 
 # remove any description from the fasta file
 with open(input_file, "r") as infile, open(output_file, "w") as outfile:
